@@ -11,47 +11,10 @@
                         <h4>Register</h4>
                     </div>
                     <div class="card-body justify-content-center">
-                        <form method="POST">
-                            {% csrf_token %}
-
-                            {% for field in form %}
-                                <div class="mb-3 w-100 ">
-{#                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>#}
-                                    <div>
-                                        {{ field }}
-                                    {% if field.errors %}
-                                        <div class="text-danger small">
-                                            {{ field.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-
-                            <button type="submit" class="btn btn-primary w-100">Register</button>
-                        </form>
+                        {% include 'components/form.html' with form=form submit_action='Register' %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {#    <div>#}
-    {#        <form action="" method="post">#}
-    {#            {% csrf_token %}#}
-    {#            {{ form.non_field_errors }}  <!-- Displays general errors -->#}
-    {##}
-    {#            {% for field in form %}#}
-    {#                <div class="form-group">#}
-    {#                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>#}
-    {#                    {{ field }}#}
-    {#                    {% if field.errors %}#}
-    {#                        <small class="text-danger">#}
-    {#                            {{ field.errors.0 }}#}
-    {#                        </small>#}
-    {#                    {% endif %}#}
-    {#                </div>#}
-    {#            {% endfor %}#}
-    {#            <button type="submit">Send</button>#}
-    {#        </form>#}
-    {#    </div>#}
 {% endblock %}
