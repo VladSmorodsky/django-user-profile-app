@@ -2,6 +2,8 @@ import re
 from typing import Union, Any
 
 from django import forms
+from django.contrib.auth import authenticate
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import User
 from PIL import Image
 
@@ -55,11 +57,11 @@ class RegisterForm(forms.ModelForm):
     Form for registering a new user
     """
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-                               validators=[validate_username])
+                               validators=[validate_username], required=True)
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
-                             validators=[validate_email])
+                             validators=[validate_email], required=True)
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
-                               validators=[validate_password])
+                               validators=[validate_password], required=True)
     password2 = forms.CharField(widget=forms.PasswordInput(
         attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}))
 
@@ -83,7 +85,7 @@ class LoginForm(forms.Form):
     """
     Form for login a user
     """
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    email = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Email'}), )
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
                                validators=[validate_password])
 
@@ -122,8 +124,10 @@ class EditUserForm(forms.ModelForm):
     """
     Edit user form
     """
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
+                               required=True)
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+                             required=True)
 
     class Meta:
         model = User
@@ -148,3 +152,57 @@ class EditUserForm(forms.ModelForm):
         if User.objects.exclude(pk=self.instance.pk).filter(email=email).count():
             raise forms.ValidationError('Email already exists')
         return email
+
+
+class ChangePasswordForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Current Password'}), required=True)
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'New Password'}), required=True)
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm New Password'}),
+        required=True)
+
+    class Meta:
+        model = User
+
+        fields = ['password']
+
+    def __init__(self, user: AbstractBaseUser, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_password(self) -> str:
+        """
+        Checks that the password is correct.
+        :return:
+        """
+        password = self.cleaned_data.get('password')
+        user = authenticate(username=self.user.username, password=password)
+        if not user:
+            raise forms.ValidationError('Incorrect password')
+        return password
+
+    def clean_new_password(self) -> str:
+        """
+        Validate changing password
+        :return:
+        """
+        cleaned_data = super().clean()
+        current_password = cleaned_data.get("password")
+        new_password = cleaned_data.get("new_password")
+        validate_password(new_password)
+        if current_password == new_password:
+            raise forms.ValidationError("New password must be different.")
+        return new_password
+
+    def clean_password_confirm(self) -> str:
+        """
+        Checks that the password is correct.
+        :return:
+        """
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get("new_password")
+        password_confirmed = cleaned_data.get("password_confirm")
+        validate_password_confirmation(new_password, password_confirmed)
+        return password_confirmed
