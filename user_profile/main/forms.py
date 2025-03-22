@@ -3,6 +3,7 @@ from typing import Union, Any
 
 from django import forms
 from django.contrib.auth.models import User
+from PIL import Image
 
 from main.models import UserProfile
 
@@ -91,27 +92,59 @@ class UserProfileForm(forms.ModelForm):
     """
     Form for user profile
     """
+
     class Meta:
         model = UserProfile
         fields = ('bio', 'avatar', 'birth_date', 'location')
 
         widgets = {
-            'bio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bio'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Bio'}),
             'avatar': forms.FileInput(attrs={'class': 'form-control', 'placeholder': 'Avatar'}),
             'birth_date': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'Birth date'}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Location'}),
         }
+
+    def clean_avatar(self) -> Union[str, None]:
+        """
+        Validate image size
+        :return:
+        """
+        image = self.cleaned_data.get('avatar')
+        if image:
+            img = Image.open(image)
+            max_size = 2 * 1024 * 1024  # 2MB
+            if img.width > max_size:
+                raise forms.ValidationError(f"Image size must be less than {max_size} MB.")
+        return image
 
 
 class EditUserForm(forms.ModelForm):
     """
     Edit user form
     """
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-                               validators=[validate_username])
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
-                             validators=[validate_email])
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
 
     class Meta:
         model = User
         fields = ('username', 'email')
+
+    def clean_username(self):
+        """
+        Validate username
+        :return:
+        """
+        username = self.cleaned_data['username']
+        if User.objects.exclude(pk=self.instance.pk).filter(username=username).count():
+            raise forms.ValidationError('Username already exists')
+        return username
+
+    def clean_email(self):
+        """
+        Validate email
+        :return:
+        """
+        email = self.cleaned_data['email']
+        if User.objects.exclude(pk=self.instance.pk).filter(email=email).count():
+            raise forms.ValidationError('Email already exists')
+        return email

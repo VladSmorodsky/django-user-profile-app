@@ -84,7 +84,7 @@ def edit_user_profile_view(request: HttpRequest) -> HttpResponse:
         profile = UserProfile.objects.get(user=request.user)
         user = profile.user
         if request.method == "POST":
-            profile_form = UserProfileForm(request.POST, instance=profile)
+            profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
             account_form = EditUserForm(request.POST, instance=user)
             if profile_form.is_valid() and account_form.is_valid():
                 account_form.save()
