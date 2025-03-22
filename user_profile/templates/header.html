@@ -12,15 +12,17 @@
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a href="#" class="nav-link">Welcome, {{ user.username }}!</a>
-                        {#                        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>#}
+                        <a href="{% url 'edit_profile' %}" class="nav-link">Welcome, {{ user.username }}!</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link text-danger">Logout</a>
                     </li>
                 {% else %}
-                    {#                    <li class="nav-item">#}
-                    {#                        <a href="{% url 'login' %}" class="btn btn-primary">Login</a>#}
-                    {#                    </li>#}
                     <li class="nav-item">
-                        <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+                        <a href="{% url 'login' %}" class="btn">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'register' %}" class="btn">Register</a>
                     </li>
                 {% endif %}
             </ul>
