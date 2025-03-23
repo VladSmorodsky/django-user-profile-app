@@ -1,8 +1,9 @@
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect
+from django.http import HttpRequest, HttpResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404
 
 from main.forms import RegisterForm, UserProfileForm, EditUserForm, LoginForm, ChangePasswordForm
 from main.models import UserProfile
@@ -10,13 +11,15 @@ from main.models import UserProfile
 
 # Create your views here.
 
+@login_required
 def home(request: HttpRequest) -> HttpResponse:
     """
     Home page
     :param request:
     :return:
     """
-    return render(request, "main/home.html")
+    user_list = UserProfile.objects.exclude(pk=request.user.pk).all()
+    return render(request, "main/home.html", {"user_list": user_list})
 
 
 def register_view(request: HttpRequest) -> HttpResponse:
@@ -71,6 +74,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
     return render(request, 'main/auth_page.html', {'form': form, 'page_title': 'Login'})
 
 
+@login_required
 def logout_view(request: HttpRequest) -> HttpResponse:
     """
     Logout a user
@@ -81,6 +85,7 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     return redirect("login")
 
 
+@login_required
 def edit_user_profile_view(request: HttpRequest) -> HttpResponse:
     """
     Edit user profile page
@@ -109,6 +114,7 @@ def edit_user_profile_view(request: HttpRequest) -> HttpResponse:
         return redirect("home")
 
 
+@login_required
 def change_password_view(request: HttpRequest) -> HttpResponse:
     """
     Change user password
@@ -129,3 +135,28 @@ def change_password_view(request: HttpRequest) -> HttpResponse:
         return render(request, 'main/change_password.html', {'form': form})
     else:
         return redirect("home")
+
+
+@login_required
+def profile_view(request: HttpRequest, username: str) -> HttpResponse:
+    """
+    Profile view page
+    :param request:
+    :param username:
+    :return:
+    """
+    try:
+        user = get_object_or_404(User, username__iexact=username)
+        return render(request, 'main/profile_page.html', {'profile': user.userprofile})
+    except User.DoesNotExist:
+        raise Http404("Page not found")
+
+
+def handler404(request: HttpRequest, exception) -> HttpResponse:
+    """
+    Handle Not Found error
+    :param request:
+    :param exception:
+    :return:
+    """
+    return render(request, '404.html', status=404)

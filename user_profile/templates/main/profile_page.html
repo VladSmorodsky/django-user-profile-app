@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block page_title %}User Profile View{% endblock %}
+
+{% block content %}
+    <div class="d-flex">
+        <div class="d-flex flex-column">
+            <div>
+                <img src="{{ profile.avatar.url }}"
+                     alt="{{ profile.user.username }}'s profile picture" class="rounded-circle"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+            </div>
+            <div>
+                <p>Username: {{ profile.user.username }}</p>
+                <p>Email: {{ profile.user.email }}</p>
+            </div>
+        </div>
+        <div class="d-flex p-4">
+            {% if profile.bio %}
+                <p>Bio: {{ profile.bio }}</p>
+            {% endif %}
+            {% if profile.birth_date %}
+                <p>Birth date: {{ profile.birth_date|date:"F j, Y" }}</p>
+            {% endif %}
+            {% if profile.location %}
+                <p>Location: {{ profile.location }}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
