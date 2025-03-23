@@ -34,6 +34,10 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +48,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -128,3 +133,29 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'METHOD': 'oauth2',
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'OAUTH_PKCE_ENABLED': True,  # Optional, but recommended for security
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+            'secret': os.getenv('GOOGLE_CLIENT_SECRET'),
+        }
+    }
+}
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+SITE_ID = 1
+LOGIN_REDIRECT_URL = '/'  # Or specify your landing page here
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'  # Where to redirect after logout
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # console for test purpose

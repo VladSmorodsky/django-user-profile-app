@@ -1,3 +1,4 @@
+{% load socialaccount %}
 <div class="card shadow-lg">
     <div class="card-header bg-primary text-white text-center">
         <h4>{{ auth_form_action|default:'Register' }}</h4>
@@ -7,16 +8,27 @@
             {% include 'components/forms/form_content.html' with form=form %}
             {% include 'components/messages.html' with messages=messages %}
             <div class="d-flex flex-column justify-content-center">
-                <div class="d-flex justify-content-center">
+                <div class="d-flex w-100">
                     <button type="submit"
-                            class="btn btn-primary w-50">{{ auth_form_action|default:"Register" }}</button>
+                            class="btn btn-primary w-100">{{ auth_form_action|default:"Register" }}</button>
                 </div>
                 <div class="d-flex justify-content-center mt-3">
                     {% if request.resolver_match.url_name == "login" %}
-                        <a href="{% url 'register' %}">Create account</a>
+                        <p class="m-0">Don't have an account? <a href="{% url 'register' %}">Create account</a></p>
                     {% elif request.resolver_match.url_name == "register" %}
-                        <a href="{% url 'login' %}">Sign in</a>
+                        <p class="m-0">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
                     {% endif %}
+                </div>
+                <hr/>
+                <div>
+                    <div>
+                        <a href="{% provider_login_url 'google' %}"
+                           class="btn border w-100">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                                 alt="Google Logo" style="width: 24px; height: 24px; margin-right: 8px;">
+                            Sign in with Google
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>
