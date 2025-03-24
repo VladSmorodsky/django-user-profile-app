@@ -155,6 +155,9 @@ class EditUserForm(forms.ModelForm):
 
 
 class ChangePasswordForm(forms.ModelForm):
+    """
+    Form for changing user password
+    """
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Current Password'}), required=True)
     new_password = forms.CharField(

@@ -8,11 +8,26 @@ User = get_user_model()
 
 
 @receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
+def create_or_update_user_profile(sender, instance: User, created: bool, **kwargs) -> None:
+    """
+    Create or update user profile
+    :param sender:
+    :param instance:
+    :param created:
+    :param kwargs:
+    :return:
+    """
     if created:
         UserProfile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
+def save_user_profile(sender, instance, **kwargs) -> None:
+    """
+    Save user profile
+    :param sender:
+    :param instance:
+    :param kwargs:
+    :return:
+    """
     instance.userprofile.save()
