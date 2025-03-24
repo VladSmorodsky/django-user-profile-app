@@ -1,3 +1,18 @@
+from django.conf.global_settings import AUTH_USER_MODEL
+from django.contrib.auth.models import User
 from django.db import models
 
+
 # Create your models here.
+class UserProfile(models.Model):
+    """
+    User Profile Model representation
+    """
+    user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=500, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    location = models.CharField(max_length=150, blank=True)
+    avatar = models.ImageField(default='default_profile_img.jpg', null=True, blank=True, upload_to='avatars/')
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
